@@ -28,10 +28,10 @@ return (
 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 >
 <header className="flex flex-col items-center">
-<h1 className="text-4xl font-bold">INSIGHT FLOW</h1>
+<h1 className="text-5xl mt-10 font-bold">INSIGHT FLOW</h1>
 <span className="text-sm text-gray-500">The automation every one needs</span>
 </header>
-{children}
+ {children}
 </body>
 </html>
 );
