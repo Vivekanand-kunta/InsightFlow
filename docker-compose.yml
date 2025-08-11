@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  nextjs:
+    container_name: frontend_InsightFlow
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    develop:
+      watch:
+        - path: ./frontend/package.json
+          action: rebuild
+        - path: ./frontend/app
+          target: /app
+          action: sync
+
+  # backend:
+  #   container_name: backend_dbms_management_system
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile.dev
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./backend:/app
+  #   command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+  #   develop:
+  #     watch:
+  #       - path: ./backend/requirements.txt
+  #         action: rebuild
+  #       - path: ./backend/app
+  #         target: /app
+  #         action: sync
