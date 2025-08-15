@@ -1,0 +1,58 @@
+CREATE TABLE tasks(
+  task_id VARCHAR(25) NOT NULL,
+  title VARCHAR(50) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  frequency VARCHAR(10) NOT NULL,
+  description TEXT,
+  CONSTRAINT task_pk PRIMARY KEY (task_id)
+);
+CREATE TABLE databases(
+  task_id VARCHAR(25) NOT NULL,
+  db_name VARCHAR(25) NOT NULL,
+  db_connection TEXT NOT NULL,
+  CONSTRAINT task_database_pk PRIMARY KEY (task_id,db_name),
+  CONSTRAINT task_database_fk FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE
+);
+CREATE TABLE emails(
+  task_id VARCHAR(25) NOT NULL,
+  category VARCHAR(10) NOT NULL,
+  email TEXT NOT NULL,
+  CONSTRAINT task_email_pk PRIMARY KEY (task_id,email),
+  CONSTRAINT task_email_fk FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE
+);
+CREATE TABLE scripts(
+  task_id VARCHAR(25) NOT NULL,
+  script_name VARCHAR(50) NOT NULL,
+  exe_order INT NOT NULL,
+  CONSTRAINT task_script_pk PRIMARY KEY (task_id,exe_order),
+  CONSTRAINT task_script_fk FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE
+);
+CREATE TABLE logs(
+  task_id VARCHAR(25) NOT NULL,
+  task_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  task_status VARCHAR(10) NOT NULL,
+  CONSTRAINT task_logs_pk PRIMARY KEY (task_id,task_time),
+  CONSTRAINT task_logs_fk FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE
+);
+CREATE TABLE table_logs(
+  task_id VARCHAR(25) NOT NULL,
+  title VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  description TEXT,
+  frequency VARCHAR(10) NOT NULL,
+  CONSTRAINT table_logs_pk PRIMARY KEY (task_id)
+);
+CREATE OR REPLACE FUNCTION logs_function()
+RETURNS TRIGGER AS $$
+BEGIN 
+  INSERT INTO table_logs(task_id,title,created_at,description,frequency)
+  VALUES (OLD.task_id,OLD.title,OLD.created_at,OLD.description,OLD.frequency);
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER after_task_delete
+AFTER DELETE ON tasks
+FOR EACH ROW 
+EXECUTE FUNCTION logs_function();
