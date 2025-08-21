@@ -1,70 +1,55 @@
 'use client';
-import Image from "next/image";
-import Card from "@/components/FuntionalComponents/Card";
-import { useState } from "react";
-import Add from "@/components/FuntionalComponents/Add";
+import { useEffect, useState } from "react";
+import axios from "@/app/api/axios";
 import { Button } from "@/components/ui/button";
-type Logs={
-    time:string;
-    status: "failure" | "success"
-}
-
-type Task={
-    title:string;
-    task_id:string;
-    creation_time:string;
-    schedule_freq:string;
-    logs:Logs[]
-}
-
+import { useRouter } from "next/navigation"; 
 
 export default function Home() {
-    const [tasks, setTasks] = useState<Task[]>([
-        {
-          title: "Daily Backup",
-          task_id: "task-001",
-          creation_time: "2025-08-10 14:30",
-          schedule_freq: "Daily",
-          logs: [
-            { time: "2025-08-10 14:31", status: "success" },
-            { time: "2025-08-09 14:30", status: "failure" },
-          ],
-        },
-        {
-          title: "Weekly Report",
-          task_id: "task-002",
-          creation_time: "2025-08-05 09:00",
-          schedule_freq: "Weekly",
-          logs: [
-            { time: "2025-08-05 09:01", status: "success" },
-            { time: "2025-07-29 09:00", status: "success" },
-          ],
-        },
-        {
-          title: "Data Sync",
-          task_id: "task-003",
-          creation_time: "2025-08-01 20:00",
-          schedule_freq: "Hourly",
-          logs: [],
-        },
-      ]);
-    
-    const [dashboard,setDashboard]=useState<boolean>(true )
+  const router = useRouter();
+  const [tasks, setTasks] = useState(null);
 
-    const toggle=()=>{setDashboard(prev=>!prev);}
-return (
-<>
-{ dashboard ?
-(<div className="mt-20 max-w-[90vw] mx-auto grid gap-4 p-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center">
-    {tasks.map((task)=>(<Card key={task.task_id} props={task}/>))}
-    <Button className="absolute rounded-4xl h-[60px] w-[60px] top-11 text-4xl bg-gray-800" onClick={toggle} >+</Button>
-</div>):(
-<>
-<Add setTask={setTasks} toggle={toggle}/>
-<Button className="absolute rounded-4xl h-[60px] w-[60px] top-11 left-23 text-2xl bg-gray-800" onClick={toggle} >Back</Button>
-</>
-)
-}
-</>
-);
+  const generateTaskId = () => {
+    const chars =
+      "abcdefghijklmnopqrstuvwxyz" +
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+      "0123456789";
+    let result = "";
+    for (let i = 0; i < 25; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
+
+  const fetch_tasks = async () => {
+    try {
+      const res = await axios.get("/api/tasks");
+      return res.data; 
+    } catch (err) {
+      console.error("Error fetching tasks:", err);
+      return {};
+    }
+  };
+
+  useEffect(() => {
+    const loadTasks = async () => {
+      const task_data = await fetch_tasks();
+      setTasks(task_data.tasks);
+    };
+    loadTasks();
+  }, []);
+
+  return (
+    <div>
+      <pre>{JSON.stringify(tasks, null, 2)}</pre>
+      <Button
+        className="bg-blue-500 text-white p-2 rounded"
+        onClick={() => {
+          const id = generateTaskId();  
+          router.push(`/${id}?task_new_option=true`); 
+        }}
+      >
+        +
+      </Button>
+    </div>
+  );
 }

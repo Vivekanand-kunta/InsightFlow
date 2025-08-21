@@ -1,49 +1,91 @@
 'use client';
-import { Input } from "@/components/ui/input";
-import Databases from "@/components/FuntionalComponents/Databases";
-import Schedule from "@/components/FuntionalComponents/Schedule";
-import Scripts from "@/components/FuntionalComponents/Scripts";
-import * as React from "react"
-import Email from "@/components/FuntionalComponents/Email";
-import { Button } from "@/components/ui/button";
-import {useState} from "react";
-import { Dispatch, SetStateAction } from "react";
+import React, { useEffect, useState } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
+import axios from '@/app/api/axios';
+import { Database, Email, Script } from '@/datatypes';
+import TaskCard from '@/components/FunctionalComponents/TaskCard';
+import { fetchtask,fetchtaskScript } from '@/components/functions/fetching';
 
+const Task = () => {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const isnewTask: string | null = searchParams.get('task_new_option');
+  const task_id = params.task_id as string;
 
+  const [title, setTitle] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [frequency, setFrequency] = useState<string>('');
+  const [databases, setDatabases] = useState<Database[]>([]);
+  const [emails, setEmails] = useState<Email[]>([]);
+  const [script, setScript] = useState<Script[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-type Prop={
-  field_id:string;
-  connection:string;
-}
-const card_page = () => {
-  const [title,setTitle]=useState<string>('')
-  const [databases,setDatabases]=useState<Prop []>([])
-  const [email,setEmail]=useState<Prop[]>([])
-  const [schedule,setSchedule]=useState<string>("daily")
- 
- const titleSetter=(value:string)=>{
-  setTitle(value);
- }
+  useEffect(() => {
+    if ((isnewTask === null || isnewTask === 'false')) {
+      (async () => {
+        try {
+          const task = await fetchtask(task_id);
+          console.log('Fetched task data:', task);
+
+          setTitle(task.title || '');
+          setDescription(task.description || '');
+          setFrequency(task.frequency || '');
+          setDatabases(task.databases || []);
+          setEmails(task.emails || []);
+          setScript(task.script || []);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      })();
+    } else {
+      setLoading(false);
+    }
+  }, [task_id, isnewTask]);
+
+  const file_viewing = async () => {
+    try {
+      const filename = 'test.py';
+      const fileURL = await fetchtaskScript('wfjmtTMuYsD8mUtFBFrNujC9S', filename);
+      
+      const link = document.createElement("a");
+      link.href = fileURL;
+      link.download = filename;
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(fileURL);
+    } catch (err) {
+      console.error('Error fetching file:', err);
+      throw new Error('Failed to fetch file');
+    }
+  };
+
+  if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="mx-auto w-[70vw]">
-    <div className="mt-15 flex justify-center">
-      <h1 className="font-bold text-4xl">Task Desk</h1>
+    <div>
+      <TaskCard
+        props={{
+          task_id,
+          title,
+          description,
+          frequency,
+          databases,
+          emails,
+          setTitle,
+          setDescription,
+          setFrequency,
+          setDatabases,
+          setEmails,
+        }}
+      />
+      <div>
+        <button onClick={file_viewing}>View File</button>
+        
+      </div>
     </div>
-    <div className="mt-15 mx-auto">
-      <Input onChange={(e)=>{titleSetter(e.target.value)}} type="text" placeholder="Title" value={title}></Input>
-    </div>
-    <Databases databases={databases} setDatabases={setDatabases}></Databases>
-    <Scripts></Scripts>
-    <Schedule schedule={schedule} setSchedule={setSchedule}></Schedule>
-    <Email databases={email} setDatabases={setEmail}></Email>
-    <div className="my-5 flex justify-around align-center">
-        <Button className="w-[7.5vw] min-w-[75px] min-h-[37.5px] h-[5vh]">Update</Button>
-        <Button className="w-[7.5vw] min-w-[75px] min-h-[37.5px] h-[5vh]">Delete</Button>
-    </div>
-    </div>
-    
   );
 };
 
-export default card_page;
+export default Task;

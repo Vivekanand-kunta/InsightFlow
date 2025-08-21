@@ -1,20 +1,16 @@
-from databases.db import pool 
-import asyncio
+from app.databases import db 
 
 async def get_all_tasks():
-    try:
-        tasks=await get_only_task_data()
-        task_ids=list(tasks.keys())
-        logs=await get_logs(task_ids)
-        for task in tasks:
-            tasks[task]["logs"]=logs[task]
-        return tasks
-    except Exception as e:
-        raise Exception("Error fetching Tasks and logs \n Error : {e}")
+    tasks=await get_only_task_data()
+    task_ids=list(tasks.keys())
+    logs=await get_logs(task_ids)
+    for task in tasks:
+        tasks[task]["logs"]=logs.get(task, [])
+    return tasks
 
 async def get_only_task_data():
     tasks={}
-    async with pool.acquire() as conn:
+    async with db.pool.acquire() as conn:
         rows=await conn.fetch("SELECT * FROM tasks")
         # it returns {task_id1 :{},task_id2:{}}
         for row in rows:
@@ -23,7 +19,7 @@ async def get_only_task_data():
 
 async def get_logs(task_ids):
     logs = {}
-    async with pool.acquire() as conn:
+    async with db.pool.acquire() as conn:
         # # THIS IS USEFUL WHEN WE HAVE FEW TASK IDS 
         # coroutines = [
         #     conn.fetch("SELECT * FROM logs WHERE task_id=$1", task_id)
