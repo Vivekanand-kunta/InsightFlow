@@ -6,6 +6,9 @@ from app.databases.create_task import create_task
 from app.files.upload import upload_file_to_frontend
 from app.files.upload import download_file_from_frontend
 from app.files.upload import delete_files
+from app.databases.update_databases import update_database_details 
+from app.databases.update_emails import update_email_details
+from app.databases.update_scripts import update_script_details
 import os 
 from pydantic import BaseModel
 from typing import List
@@ -35,6 +38,12 @@ class Task(BaseModel):
     emails: List[Email]
     scripts: List[Script]
 
+
+
+
+
+
+
 # Fetching or Get requests
 @router.get("/tasks")
 async def get_tasks():
@@ -61,6 +70,12 @@ async def get_task_script(task_id:str,filename:str):
         raise HTTPException(status_code=400,detail=f"Error {e} \n While fetching script")
     
 
+
+
+
+
+
+
 # Creations or Post requests
 @router.post('/task/{task_id}')
 async def upload_data(task_id:str,task:Task):
@@ -80,7 +95,42 @@ async def upload_script(task_id:str,filename:str,file:UploadFile = File(...)):
             return res
     except Exception as e :
         raise HTTPException(status_code=400,detail=f"Error {e} \n While uploading script")
+
+
+
+
+# Updating or Put requests
+@router.put('/task/database/{d_id}')
+async def updateDbDetails(d_id:str,db_connection:str,db_name:str):
+    try:
+        res=await update_database_details(d_id,db_name,db_connection)
+        if res.get('status') == "success":
+            return res
+    except Exception as e :
+        raise HTTPException(status_code=400,detail=f"Error {e} \n While updating database details")
+
+@router.put('/task/email/{e_id}')
+async def updateEmailDetails(e_id:str,category:str,email:str):
+    try:
+        res=await update_email_details(e_id,category,email)
+        if res.get('status') == "success":
+            return res
+    except Exception as e :
+        raise HTTPException(status_code=400,detail=f"Error {e} \n While updating database details")
     
+@router.put('task/script/{s_id}')
+async def updateScriptDetails(s_id:str,exe_order:str,script_name:str,task_id:str):
+    try:
+        res=await update_script_details(task_id,s_id,exe_order,script_name)
+        if res.get('status') == "success":
+            return res
+    except Exception as e:
+        raise HTTPException(status_code=400,detail=f"Error {e} \n While updating database details")
+    
+
+
+
+
 # Deletions
 @router.delete('/task/{task_id}/script/{filename}')
 async def delete_script(task_id:str,filename:str):

@@ -1,46 +1,38 @@
 import React from 'react'
-import { Database } from '@/datatypes';
+import { DatabasesProps } from '@/datatypes'
 import { Input } from '../ui/input';
+import {Button} from '../ui/button';
+import { updateDatabaseConnection } from '../functions/fetching';
+import { useState } from 'react';
 
-interface DatabasesProps {
-  database: Database;
-  databases: Database[];
-  setDatabases: (databases: Database[]) => void;
-}
-
-const Databases = (props: DatabasesProps) => {
+const Databases = (props:DatabasesProps) => {
+    const [modified,setModified]=useState<boolean>(false);
   return (
     <div>
-    <Input
-        type="text"
-        placeholder="Database Connection"
-        value={props.database.db_name}
-        onChange={(e) => {
-          props.setDatabases(
-            props.databases.map((db) =>
-              db.db_name === props.database.db_name
-                ? { ...db, db_name: e.target.value }
-                : db
-            )
-          );
-        }}
-      />
-      <Input
-        type="text"
-        placeholder="Database Connection"
-        value={props.database.db_connection}
-        onChange={(e) => {
-          props.setDatabases(
-            props.databases.map((db) =>
-              db.db_name === props.database.db_name
-                ? { ...db, db_connection: e.target.value }
-                : db
-            )
-          );
-        }}
-      />
+        <Input type="text" 
+        value={props.database.db_name} 
+        onChange={(e)=>{props.setDatabases([...props.databases,{...props.database,db_name:e.target.value}]);setModified(true);}} 
+        className='w-full mb-2' placeholder='Database Name'/>
+
+        <Input type="text" 
+        value={props.database.db_name} 
+        onChange={(e)=>{props.setDatabases([...props.databases,{...props.database,db_connection:e.target.value}]);setModified(true);}} 
+        className='w-full mb-2' placeholder='Postgres Connection String'/>
+
+        {modified &&
+        <Button onClick={async()=>{
+            try{
+            await updateDatabaseConnection(props.database.d_id,props.database.db_connection,props.database.db_name);
+            setModified(false)
+            }
+            catch(err){
+                console.error(err);
+                throw new Error("Failed to update database connection")
+            };
+        }}>Update</Button>
+    }
     </div>
   )
 }
 
-export default Databases;
+export default Databases

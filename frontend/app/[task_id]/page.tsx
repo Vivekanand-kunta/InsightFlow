@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Database, Email, Script } from '@/datatypes';
-import TaskCard from '@/components/FunctionalComponents/TaskCard';
 import { fetchTask,fetchTaskScript,uploadTask } from '@/components/functions/fetching';
 
 const Task = () => {
@@ -17,6 +16,8 @@ const Task = () => {
   const [databases, setDatabases] = useState<Database[]>([]);
   const [emails, setEmails] = useState<Email[]>([]);
   const [scripts, setScripts] = useState<Script[]>([]);
+
+
   const [loading, setLoading] = useState<boolean>(true);
   const [urls,setUrls]=useState<string[]>([]);
 
