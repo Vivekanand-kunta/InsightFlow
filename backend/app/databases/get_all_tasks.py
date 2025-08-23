@@ -14,7 +14,7 @@ async def get_only_task_data():
         rows=await conn.fetch("SELECT * FROM tasks")
         # it returns {task_id1 :{},task_id2:{}}
         for row in rows:
-            tasks[row['task_id']]=dict(row) 
+            tasks[row['task_id']]={k: v for k, v in row.items() if k != "task_id"}
     return tasks
 
 async def get_logs(task_ids):
@@ -22,7 +22,7 @@ async def get_logs(task_ids):
     async with db.pool.acquire() as conn:
         # # THIS IS USEFUL WHEN WE HAVE FEW TASK IDS 
         # coroutines = [
-        #     conn.fetch("SELECT * FROM logs WHERE task_id=$1", task_id)
+        #     conn.fetch("SELECT task_time,task_status FROM logs WHERE task_id=$1", task_id)
         #     for task_id in task_ids
         # ]
         # # Run all queries concurrently
@@ -35,7 +35,7 @@ async def get_logs(task_ids):
 
         # THIS IS USEFUL WHEN WE HAVE MANY TASKS
         rows = await conn.fetch(
-            "SELECT * FROM logs WHERE task_id = ANY($1::text[])", task_ids
+            "SELECT task_time,task_status FROM logs WHERE task_id = ANY($1::text[])", task_ids
         )
         for row in rows:
             logs.setdefault(row['task_id'], []).append(dict(row))

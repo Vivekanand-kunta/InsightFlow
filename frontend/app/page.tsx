@@ -1,38 +1,17 @@
 'use client';
 import { useEffect, useState } from "react";
-import axios from "@/app/api/axios";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation"; 
+import { generateTaskId } from "@/components/functions/functionalities";
+import { fetchTasks } from "@/components/functions/fetching";
 
 export default function Home() {
   const router = useRouter();
   const [tasks, setTasks] = useState(null);
-
-  const generateTaskId = () => {
-    const chars =
-      "abcdefghijklmnopqrstuvwxyz" +
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-      "0123456789";
-    let result = "";
-    for (let i = 0; i < 25; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  };
-
-  const fetch_tasks = async () => {
-    try {
-      const res = await axios.get("/api/tasks");
-      return res.data; 
-    } catch (err) {
-      console.error("Error fetching tasks:", err);
-      return {};
-    }
-  };
-
+  
   useEffect(() => {
     const loadTasks = async () => {
-      const task_data = await fetch_tasks();
+      const task_data = await fetchTasks();
       setTasks(task_data.tasks);
     };
     loadTasks();

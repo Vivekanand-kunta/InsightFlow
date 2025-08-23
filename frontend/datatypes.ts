@@ -1,20 +1,19 @@
 export interface Database{
-task_id:string;
-db_name:string;
-db_connection:string;
+    db_name:string;
+    d_id:string;
+    db_connection:string;
 }
 
 export interface Email{
-    task_id:string;
     cateogry:string;
+    e_id:string;
     email:string;
 }
 
 export interface Script{
-    task_id:string;
     script_name:string;
+    s_id:string;
     exe_order:string;
-    script_extension:string;
 }
 
 export interface Task{
