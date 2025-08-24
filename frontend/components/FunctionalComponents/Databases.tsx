@@ -1,12 +1,8 @@
 import React from 'react'
 import { DatabasesProps } from '@/datatypes'
 import { Input } from '../ui/input';
-import {Button} from '../ui/button';
-import { updateDatabaseConnection } from '../functions/fetching';
-import { useState } from 'react';
 
 const Databases = (props:DatabasesProps) => {
-    const [modified,setModified]=useState<boolean>(false);
   return (
     <div>
         <Input type="text" 
@@ -19,7 +15,7 @@ const Databases = (props:DatabasesProps) => {
                 : db
             )
           );
-          setModified(true);
+          props.setModified(true);
         }}
         className='w-full mb-2' placeholder='Database Name'/>
 
@@ -33,22 +29,9 @@ const Databases = (props:DatabasesProps) => {
                 : db
             )
           );
-          setModified(true);
+          props.setModified(true);
         }}
         className='w-full mb-2' placeholder='Postgres Connection String'/>
-
-        {modified &&
-        <Button onClick={async()=>{
-            try{
-            await updateDatabaseConnection(props.database.d_id,props.database.db_connection,props.database.db_name);
-            setModified(false)
-            }
-            catch(err){
-                console.error(err);
-                throw new Error("Failed to update database connection")
-            };
-        }}>Update</Button>
-    }
     </div>
   )
 }

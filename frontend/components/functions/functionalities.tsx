@@ -1,4 +1,4 @@
-import { Email,Script } from "@/datatypes";
+import {  Task } from "@/datatypes";
 
 export function generateTaskId(){ 
     const chars =
@@ -15,9 +15,10 @@ export function generateTaskId(){
 export function urlCreatorfunction(file:File){
   return URL.createObjectURL(file)
 }
-  export function validateTask(title:string,emails:Email[],scripts:Script[]){
-    if (title.length==0 || emails.length==0 || scripts.length==0){
-      alert('Please fill title,emails and script fields');
+
+export function validateTask(task:Task){
+    if (task.title.length==0 || task.emails.length==0 || task.description.length==0 || task.scripts.length==0){
+      alert('Please fill title,emails,description,frequency and script fields');
       return false;}
     return true;
-  };
+};

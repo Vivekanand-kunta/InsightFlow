@@ -59,14 +59,4 @@ async def create_task(task_id: str, task: Task):
                     task_id, email.category, email.email, email.e_id
                 )
 
-            # Insert scripts
-            for script in task.scripts:
-                await conn.execute(
-                    """
-                    INSERT INTO scripts(task_id, script_name, s_id, exe_order)
-                    VALUES ($1, $2, $3, $4)
-                    """,
-                    task_id, script.script_name, script.s_id, script.exe_order
-                )
-
     return {"status": "success"}

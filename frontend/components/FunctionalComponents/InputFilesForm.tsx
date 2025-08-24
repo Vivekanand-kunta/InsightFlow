@@ -68,7 +68,7 @@ const InputFilesForm = (props:InputFilesFormProps) => {
             +
           </Button>
           <Button onClick={()=>{submitFile();}}>
-            Submit
+            Submit File
           </Button>
       </div>
   );

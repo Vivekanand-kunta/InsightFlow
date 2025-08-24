@@ -6,8 +6,7 @@ from app.databases.create_task import create_task
 from app.files.upload import upload_file_to_frontend
 from app.files.upload import download_file_from_frontend
 from app.files.upload import delete_files
-from app.databases.update_databases import update_database_details 
-from app.databases.update_emails import update_email_details
+from app.databases.update_task import update_task_details
 from app.databases.update_scripts import update_script_details
 from app.databases.check_task import check_task
 from app.files.check_scripts import check_script
@@ -82,10 +81,12 @@ async def get_task_script(task_id:str,filename:str):
 @router.post('/task/{task_id}')
 async def upload_data(task_id:str,task:Task):
     try:
-        res=await create_task(task_id,task)
-        if res.get('status') == "success":
-            os.makedirs(f"{os.getenv('BASE_ADD')}/scripts/{task_id}", exist_ok=True)
+        response=await check_task(task_id)
+        if response.exists=='false':
+            res=await create_task(task_id,task)
             return {"status":"success"}
+        else:
+            res=await update_task_details(task)
     except Exception as e :
         raise HTTPException(status_code=400,detail=f"Error {e} \n While creating task")
     
@@ -110,7 +111,6 @@ async def check_task_existence(payload=Body(...)):
 
 @router.post('/validate/script')
 async def check_script_existence(payload=Body(...)):
-    print(f"script payload:{payload}")
     try:
         task_id=payload.get('task_id')
         script_name=payload.get('script_name')
@@ -126,24 +126,7 @@ async def check_script_existence(payload=Body(...)):
 
 
 # Updating or Put requests
-@router.put('/task/database/{d_id}')
-async def updateDbDetails(d_id:str,db_connection:str,db_name:str):
-    try:
-        res=await update_database_details(d_id,db_name,db_connection)
-        if res.get('status') == "success":
-            return res
-    except Exception as e :
-        raise HTTPException(status_code=400,detail=f"Error {e} \n While updating database details")
-
-@router.put('/task/email/{e_id}')
-async def updateEmailDetails(e_id:str,category:str,email:str):
-    try:
-        res=await update_email_details(e_id,category,email)
-        if res.get('status') == "success":
-            return res
-    except Exception as e :
-        raise HTTPException(status_code=400,detail=f"Error {e} \n While updating database details")
-    
+  
 @router.put('task/script/{s_id}')
 async def updateScriptDetails(s_id:str,exe_order:str,script_name:str,task_id:str):
     try:
@@ -153,6 +136,10 @@ async def updateScriptDetails(s_id:str,exe_order:str,script_name:str,task_id:str
     except Exception as e:
         raise HTTPException(status_code=400,detail=f"Error {e} \n While updating database details")
     
+
+
+
+
 
 
 

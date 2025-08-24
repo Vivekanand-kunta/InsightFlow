@@ -42,22 +42,26 @@ export interface TaskContainerProps{
 
 export interface FrequencyProps{
     frequency:string,
+    setModified:React.Dispatch<React.SetStateAction<boolean>>,
     setFrequency:React.Dispatch<React.SetStateAction<string>>
 }
 
 export interface DatabasesProps{
     database:Database,
+    setModified:React.Dispatch<React.SetStateAction<boolean>>,
     setDatabases:React.Dispatch<React.SetStateAction<Database[]>>
 }
 
 export interface EmailsProps{
     email:Email,
+    setModified:React.Dispatch<React.SetStateAction<boolean>>,
     setEmails:React.Dispatch<React.SetStateAction<Email[]>>
 }
 
 export interface ScriptProps{
     task_id:string,
     script:Script,
+    setModified:React.Dispatch<React.SetStateAction<boolean>>,
     setScripts:React.Dispatch<React.SetStateAction<Script[]>>
 }
 

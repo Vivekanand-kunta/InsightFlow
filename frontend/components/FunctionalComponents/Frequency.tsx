@@ -15,9 +15,9 @@ const Frequency = (props:FrequencyProps) => {
   return (
     <Select
     defaultValue={props.frequency || 'daily'}
-    onValueChange={(value)=>props.setFrequency(value)}>
+    onValueChange={(value)=>{props.setFrequency(value);props.setModified(true);}}>
       <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Select a fruit" />
+        <SelectValue placeholder="Select a Schedule" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
