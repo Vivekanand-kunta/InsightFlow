@@ -5,7 +5,7 @@ export interface Database{
 }
 
 export interface Email{
-    cateogry:string;
+    category:string;
     e_id:string;
     email:string;
 }
@@ -23,11 +23,6 @@ export interface Task{
     databases:Database[];
     emails:Email[];
     scripts:Script[];
-}
-
-export interface Url{
-    url:string|null,
-    s_id:string
 }
 export interface TaskContainerProps{
     task_id:string,
@@ -51,13 +46,11 @@ export interface FrequencyProps{
 }
 
 export interface DatabasesProps{
-    databases:Database[],
     database:Database,
     setDatabases:React.Dispatch<React.SetStateAction<Database[]>>
 }
 
 export interface EmailsProps{
-    emails:Email[],
     email:Email,
     setEmails:React.Dispatch<React.SetStateAction<Email[]>>
 }
@@ -65,14 +58,10 @@ export interface EmailsProps{
 export interface ScriptProps{
     task_id:string,
     script:Script,
-    url:Url,
-    setUrls:React.Dispatch<React.SetStateAction<Url[]>>,
     setScripts:React.Dispatch<React.SetStateAction<Script[]>>
 }
 
 export interface InputFilesFormProps{
     filename:string,
     task_id : string,
-    url:Url,
-    setUrls:React.Dispatch<React.SetStateAction<Url[]>>,
-   }
+    setModified:React.Dispatch<React.SetStateAction<boolean>>}

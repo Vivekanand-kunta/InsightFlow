@@ -1,13 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams} from 'next/navigation';
 import { Database, Email, Script } from '@/datatypes';
-import { fetchTask,fetchTaskScript,uploadTask } from '@/components/functions/fetching';
-
+import { fetchTask,checkTask } from '@/components/functions/fetching';
+import TaskContainer from '@/components/FunctionalComponents/TaskContainer'
 const Task = () => {
   const params = useParams();
-  const searchParams = useSearchParams();
-  const isnewTask: string | null = searchParams.get('task_new_option');
   const task_id = params.task_id as string;
 
   const [title, setTitle] = useState<string>('');
@@ -19,38 +17,55 @@ const Task = () => {
 
 
   const [loading, setLoading] = useState<boolean>(true);
-  const [urls,setUrls]=useState<string[]>([]);
 
   useEffect(() => {
-    if ((isnewTask === null || isnewTask === 'false')) {
-      (async () => {
+    const initFunction = async () => {
+      const oldTask: boolean = await checkTask(task_id);
+      if (oldTask) {
         try {
           const task = await fetchTask(task_id);
-          console.log('Fetched task data:', task);
-
-          setTitle(task.title || '');
-          setDescription(task.description || '');
-          setFrequency(task.frequency || '');
+          setTitle(task.title || 'Enter the title');
+          setDescription(task.description || 'Enter some description');
+          setFrequency(task.frequency || 'daily');
           setDatabases(task.databases || []);
           setEmails(task.emails || []);
-          setScripts(task.script || []);
+          setScripts(task.scripts || []);
         } catch (err) {
           console.error(err);
         } finally {
           setLoading(false);
         }
-      })();
-    } else {
-      setLoading(false);
-    }
-  }, [task_id, isnewTask]);
-
-
+      } else {
+        setTitle('Enter the title');
+        setDescription('Enter some description');
+        setFrequency('daily');
+        setDatabases([]);
+        setEmails([]);
+        setScripts([]);
+        setLoading(false);
+      }
+    };
+    initFunction();
+  }, [task_id]); 
+  
   if (loading) return <p>Loading...</p>;
-
   return (
     <div>
-      Hello this is testing frontend.I am Vivek
+     <TaskContainer 
+     task_id={task_id}
+     title={title}
+    description={description}
+    frequency={frequency}
+    databases={databases}
+    emails={emails}
+    scripts={scripts}
+    setTitle={setTitle}
+    setDescription={setDescription}
+    setFrequency={setFrequency}
+    setDatabases={setDatabases}
+    setEmails={setEmails}
+    setScripts={setScripts}
+    />
     </div>
   );
 };

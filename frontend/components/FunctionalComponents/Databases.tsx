@@ -11,12 +11,30 @@ const Databases = (props:DatabasesProps) => {
     <div>
         <Input type="text" 
         value={props.database.db_name} 
-        onChange={(e)=>{props.setDatabases([...props.databases,{...props.database,db_name:e.target.value}]);setModified(true);}} 
+        onChange={(e) => {
+          props.setDatabases(prevValues =>
+            prevValues.map(db =>
+              db.d_id === props.database.d_id
+                ? { ...db, db_name: e.target.value }
+                : db
+            )
+          );
+          setModified(true);
+        }}
         className='w-full mb-2' placeholder='Database Name'/>
 
         <Input type="text" 
-        value={props.database.db_name} 
-        onChange={(e)=>{props.setDatabases([...props.databases,{...props.database,db_connection:e.target.value}]);setModified(true);}} 
+        value={props.database.db_connection} 
+        onChange={(e) => {
+          props.setDatabases(prevValues =>
+            prevValues.map(db =>
+              db.d_id === props.database.d_id
+                ? { ...db, db_connection: e.target.value }
+                : db
+            )
+          );
+          setModified(true);
+        }}
         className='w-full mb-2' placeholder='Postgres Connection String'/>
 
         {modified &&

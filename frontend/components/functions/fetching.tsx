@@ -1,6 +1,40 @@
 import { Task } from "@/datatypes";
 import { validateTask } from "./functionalities";
 
+export async function checkTask(task_id:string){
+  try{
+    const response=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/validate/task`,
+      {method:'POST',headers:{"Content-Type":'application/json'},body:JSON.stringify({task_id})}
+      );
+    if(!response.ok){
+      throw new Error(`Failed to fetch tasks status . Status: ${response.status}`);
+    }
+    const res=await response.json()
+    return res.exists==='true'?true:false
+  }
+  catch(err){
+    console.error("\n functions/fetching/ \n Error fetching tasks:", err);
+    throw new Error("Failed to fetch tasks data");
+  }
+}
+
+export async function checkScript(task_id:string,filename:string){
+  try{
+    const response=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/validate/script`,
+      {method:'POST',headers:{"Content-Type":'application/json'},body:JSON.stringify({task_id,'script_name':filename})}
+      );
+  if(!response.ok){
+    throw new Error(`Failed to fetch script status . Status: ${response.status}`);
+  }
+  const res=await response.json()
+  return res.exists==='true'?true:false
+}
+  catch(err){
+      console.error("\n functions/fetching/ \n Error fetching tasks:", err);
+      throw new Error("Failed to fetch tasks data");
+}
+}
+
 export async function fetchTasks(){
   try{
     const res=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/tasks`);

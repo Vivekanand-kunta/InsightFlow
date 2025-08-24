@@ -1,14 +1,14 @@
-import React, { useState} from 'react'
+import React from 'react'
 import { Input } from '../ui/input';
-import { TaskContainerProps, Url} from '@/datatypes';
+import { TaskContainerProps,Script,Database, Email} from '@/datatypes';
 import Frequency from './Frequency';
 import Databases from './Databases';
 import Emails from './Emails';
 import Scripts from './Scripts';
+import { Button } from '../ui/button';
+import { generateTaskId } from '../functions/functionalities';
 
 const TaskContainer = (props: TaskContainerProps) => {
-  const [urls, setUrls] = useState<Url[]>([]);
-
   return (
     <div className='w-full h-auto flex flex-col gap-4 p-4 border border-gray-300 rounded-lg'>
       <div>
@@ -37,10 +37,16 @@ const TaskContainer = (props: TaskContainerProps) => {
       </div>
 
       <div>
+        <Button onClick={()=>{
+            const databaseNew:Database={
+              db_connection:'postgresql://username:password@host:port/database',
+              d_id: generateTaskId(),
+              db_name:'Enter database Name'}  
+              props.setDatabases(prevValues=>[...prevValues,databaseNew]);
+              }}/> 
         {props.databases.map((database) => (
           <Databases
             key={database.d_id}
-            databases={props.databases}
             database={database}
             setDatabases={props.setDatabases}
           />
@@ -48,10 +54,13 @@ const TaskContainer = (props: TaskContainerProps) => {
       </div>
 
       <div>
+        <Button onClick={()=>{
+          const emailNew:Email={category:'all',e_id:generateTaskId(),email:'email123@gmail.com'}
+          props.setEmails(prevValues=>[...prevValues,emailNew])
+        }} />
         {props.emails.map((email) => (
           <Emails
             key={email.e_id}
-            emails={props.emails}
             email={email}
             setEmails={props.setEmails}
           />
@@ -59,19 +68,18 @@ const TaskContainer = (props: TaskContainerProps) => {
       </div>
 
       <div>
-        {props.scripts.map((script) => {
-          const scriptUrl = urls.find((url) => url.s_id === script.s_id) || { url: null, s_id: script.s_id };
-          return (
-            <Scripts
-              key={script.s_id}
-              task_id={props.task_id}
-              script={script}
-              url={scriptUrl}
-              setUrls={setUrls}
-              setScripts={props.setScripts}
-            />
-          );
-        })}
+      <Button onClick={()=>{
+          const scriptNew:Script={script_name:'NewScript.py',s_id:generateTaskId(),exe_order:'1'}
+          props.setScripts(prevValues=>[...prevValues,scriptNew])
+        }} />
+        {props.scripts.map((script) => (
+          <Scripts
+            key={script.s_id}
+            task_id={props.task_id}
+            script={script}
+            setScripts={props.setScripts}
+          />
+        ))}
       </div>
     </div>
   );

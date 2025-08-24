@@ -11,26 +11,41 @@ const Scripts = (props:ScriptProps) => {
     const [modified,setModified]=useState<boolean>(false);
     const exeRef=useRef<HTMLInputElement|null>(null);
     const scriptNameRef=useRef<HTMLInputElement|null>(null);
+
   return (
     <div>
         <Input type="text" 
         value={props.script.exe_order} 
         ref={exeRef}
-        onChange={(e)=>{props.setScripts(prevValues=>[...prevValues,{...props.script,exe_order:e.target.value}]);setModified(true);}} 
-        className='w-full mb-2' placeholder='Exe-Order Number'/>
+        onChange={(e) => {
+            props.setScripts(prevValues =>
+              prevValues.map(sc =>
+                sc.s_id === props.script.s_id
+                  ? { ...sc, exe_order: e.target.value }
+                  : sc
+              )
+            );
+            setModified(true);
+          }}
+          className='w-full mb-2' placeholder='Exe-Order Number'/>
 
         <Input type="text" 
         value={props.script.script_name} 
         ref={scriptNameRef}
-        onChange={(e)=>{props.setScripts(prevValues=>[...prevValues,{...props.script,script_name:e.target.value}]);setModified(true);}} 
-        className='w-full mb-2' placeholder='Script Name'/>
-
+        onChange={(e) => {
+            props.setScripts(prevValues =>
+              prevValues.map(sc =>
+                sc.s_id === props.script.s_id
+                  ? { ...sc, script_name: e.target.value }
+                  : sc
+              )
+            );
+            setModified(true);
+          }} className='w-full mb-2' placeholder='Script Name'/>
+         <InputFilesForm filename={props.script.s_id}
+         task_id={props.task_id} setModified={setModified}/>
         {modified && exeRef.current && scriptNameRef.current &&
         <div>
-        <InputFilesForm filename={scriptNameRef.current.value}
-         task_id={props.task_id} url={props.url} setUrls={props.setUrls}/>
-        {
-        props.url &&
         <Button onClick={async()=>{
             try{
             await updateScriptsConnection(props.task_id,props.script.s_id,props.script.exe_order,props.script.script_name);
@@ -41,9 +56,10 @@ const Scripts = (props:ScriptProps) => {
                 throw new Error("Failed to update Scripts")
             };
         }}>Update</Button>
-    }
+    
         </div>
     }
+    <Button onClick={()=>{}}>Delete</Button>
     </div>
   )
 }

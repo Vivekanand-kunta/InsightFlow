@@ -1,4 +1,4 @@
-from fastapi import APIRouter,HTTPException,UploadFile,File
+from fastapi import APIRouter,HTTPException,UploadFile,File,Body
 from fastapi.responses import FileResponse
 from app.databases.get_all_tasks import get_all_tasks
 from app.databases.get_task import get_task
@@ -9,6 +9,8 @@ from app.files.upload import delete_files
 from app.databases.update_databases import update_database_details 
 from app.databases.update_emails import update_email_details
 from app.databases.update_scripts import update_script_details
+from app.databases.check_task import check_task
+from app.files.check_scripts import check_script
 import os 
 from pydantic import BaseModel
 from typing import List
@@ -38,7 +40,8 @@ class Task(BaseModel):
     emails: List[Email]
     scripts: List[Script]
 
-
+class TaskCheck(BaseModel):
+    task_id: str
 
 
 
@@ -52,7 +55,7 @@ async def get_tasks():
         return tasks
     except Exception as e :
         raise HTTPException(status_code=400,detail=f"Error {e} \n While fetching tasks")
-
+    
 @router.get("/task/{task_id}")
 async def get_single_task(task_id:str):
     try:
@@ -69,7 +72,6 @@ async def get_task_script(task_id:str,filename:str):
     except Exception as e :
         raise HTTPException(status_code=400,detail=f"Error {e} \n While fetching script")
     
-
 
 
 
@@ -95,6 +97,30 @@ async def upload_script(task_id:str,filename:str,file:UploadFile = File(...)):
             return res
     except Exception as e :
         raise HTTPException(status_code=400,detail=f"Error {e} \n While uploading script")
+
+@router.post('/validate/task')
+async def check_task_existence(payload=Body(...)):
+    print(f"task payload:{payload}")
+    try:
+        task_id=payload.get('task_id')
+        res=await check_task(task_id)
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=400,detail=f"Error {e} \n While fetching tasks")
+
+@router.post('/validate/script')
+async def check_script_existence(payload=Body(...)):
+    print(f"script payload:{payload}")
+    try:
+        task_id=payload.get('task_id')
+        script_name=payload.get('script_name')
+        res=await check_script(task_id,script_name)
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=400,detail=f"Error {e} \n While fetching tasks")
+
+
+
 
 
 

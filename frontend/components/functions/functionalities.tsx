@@ -12,6 +12,9 @@ export function generateTaskId(){
     return result;
   };
 
+export function urlCreatorfunction(file:File){
+  return URL.createObjectURL(file)
+}
   export function validateTask(title:string,emails:Email[],scripts:Script[]){
     if (title.length==0 || emails.length==0 || scripts.length==0){
       alert('Please fill title,emails and script fields');

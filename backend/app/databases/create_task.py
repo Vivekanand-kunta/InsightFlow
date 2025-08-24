@@ -23,42 +23,50 @@ class Task(BaseModel):
     databases: List[Database]
     emails: List[Email]
     scripts: List[Script]
-
-async def create_task(task_id: str,task:Task):
+    
+async def create_task(task_id: str, task: Task):
     if db.pool is None:
         raise Exception("Pool not initialized")
 
     async with db.pool.acquire() as conn:
         async with conn.transaction():
+            # Insert task
             await conn.execute(
                 """
                 INSERT INTO tasks(id, title, description, frequency)
-                VALUES($1, $2, $3, $4)
+                VALUES ($1, $2, $3, $4)
                 """,
                 task_id, task.title, task.description, task.frequency
             )
-            for db in task.databases:
+
+            # Insert databases
+            for db_item in task.databases:
                 await conn.execute(
                     """
-                    INSERT INTO databases(task_id, db_name,db_connection,d_id)
-                    VALUES($1, $2,$3)
+                    INSERT INTO databases(task_id, db_name, db_connection, d_id)
+                    VALUES ($1, $2, $3, $4)
                     """,
-                    task_id, db.db_name,db.db_connection,db.d_id
+                    task_id, db_item.db_name, db_item.db_connection, db_item.d_id
                 )
+
+            # Insert emails
             for email in task.emails:
                 await conn.execute(
                     """
-                    INSERT INTO emails(task_id,category,email,eid)
-                    VALUES($1, $2,$3)
+                    INSERT INTO emails(task_id, category, email, e_id)
+                    VALUES ($1, $2, $3, $4)
                     """,
-                    task_id,email.category,email.email,email.e_id
+                    task_id, email.category, email.email, email.e_id
                 )
+
+            # Insert scripts
             for script in task.scripts:
                 await conn.execute(
                     """
-                    INSERT INTO scripts(task_id,script_name,s_id,exe_order)
-                    VALUES($1,$2,$3)
+                    INSERT INTO scripts(task_id, script_name, s_id, exe_order)
+                    VALUES ($1, $2, $3, $4)
                     """,
-                    task_id,script.script_name,script.s_id,script.exe_order
-            )
+                    task_id, script.script_name, script.s_id, script.exe_order
+                )
+
     return {"status": "success"}
