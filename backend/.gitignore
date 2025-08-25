@@ -1,3 +1,14 @@
-# Files and directories to be ignored by Git
-backend/scripts/
+# Ignore environment variables
+.env
 
+# Ignore the scripts folder and its contents
+scripts/
+requirements.txt
+
+# (optional) Ignore Python cache and build files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3

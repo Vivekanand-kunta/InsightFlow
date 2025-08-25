@@ -27,8 +27,8 @@ export async function fetchTask(task_id: string) {
       if (!response.ok) {
         throw new Error(`Failed to fetch task. Status: ${response.status}`);
       }
-      const task = await response.json();
-      return task;
+      const res = await response.json();
+      return res.task;
     } catch (err) {
       console.error("\n functions/fetching/ \n Error fetching task:", err);
       throw new Error("Failed to fetch task data");
@@ -38,7 +38,7 @@ export async function fetchTask(task_id: string) {
 export async function fetchTaskScript(task_id:string,filename:string){
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/task/${task_id}/script/${filename}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/task/${task_id}/script/${filename}.py`
       );
       if (!response.ok) {
         throw new Error(`Failed to fetch script. Status: ${response.status}`);
@@ -63,7 +63,7 @@ export async function fetchTaskScript(task_id:string,filename:string){
 
 export async function uploadTask(task_id:string,task_data:Task){
     try{
-        if(validateTask(task_data)==false){
+        if(validateTask(task_data)){
             const response =await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/task/${task_id}`,
                 {method:"POST",headers: {'Content-Type': 'application/json',},
                 body: JSON.stringify(task_data)
@@ -75,7 +75,7 @@ export async function uploadTask(task_id:string,task_data:Task){
             return res;
         }
         else{
-            alert('Please fill title,emails and script fields');
+            alert('Please fill title,emails,description and frequency fields');
             return {"status":'failed'};
         }
   }
@@ -85,24 +85,30 @@ export async function uploadTask(task_id:string,task_data:Task){
     }
 };
 
-export async function uploadScript(task_id:string,filename:string,file:File){
-    try{
-      const formData=new FormData()
-      formData.append('file',file)
+export async function uploadScript(task_id: string, filename: string, file: File) {
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
 
-      const response=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/task/${task_id}/script/${filename}`,
-                      {method:'POST',body:formData});
-      if(!response.ok){
-        throw new Error(`Failed to uplaod script.Status : ${response.status}`)
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/task/${task_id}/script/${filename}.py`,
+      {
+        method: "POST",
+        body: formData,
       }
-      const url=await fetchTaskScript(task_id,filename)
-      return url
-    } 
-    catch(err){
-      console.error("\n functions/fetching/ \n Error uploading script:", err);
-      throw new Error("Failed to upload script data");
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to upload script. Status: ${response.status}`);
     }
+    const url = await fetchTaskScript(task_id, filename);
+    return url;
+  } catch (err) {
+    console.error("\n functions/fetching/ \n Error uploading script:", err);
+    throw new Error("Failed to upload script data");
+  }
 };
+
 
 export async function checkScript(task_id:string,filename:string){
   try{
@@ -137,32 +143,28 @@ export async function checkTask(task_id:string){
     console.error("\n functions/fetching/ \n Error fetching tasks:", err);
     throw new Error("Failed to fetch tasks data");
   }
-}
+};
 
+export async function updateScriptsConnection(task_id:string,s_id:string,exe_order:string,script_name:string){
+  try{
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/task/script/${s_id}`, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },  // <-- add this
+      body: JSON.stringify({
+        exe_order: exe_order,
+        script_name: script_name,
+        task_id: task_id
+      })
+    });
 
-
-
-
-
-
-
-
-
-
-// Put Methods
-  export async function updateScriptsConnection(task_id:string,s_id:string,exe_order:string,script_name:string){
-    try{
-      const response=await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/task/script/${s_id}`,
-        {method:'PUT',body:JSON.stringify({'exe_order':exe_order,
-        'script_name':script_name,'task_id':task_id})});
-
-      if(!response.ok){throw new Error(`Failed to uplaod script.Status : ${response.status}`)
-      }
-      const res=await response.json();
-      return res
-    } 
-    catch(err){
-      console.error("\n functions/fetching/ \n Error uploading script:", err);
-    throw new Error("Failed to upload script data");
+    if (!response.ok) {
+      throw new Error(`Failed to update script. Status : ${response.status}`);
     }
+    const res = await response.json();
+    return res;
+  } 
+  catch(err){
+    console.error("\n functions/fetching/ \n Error uploading script:", err);
+    throw new Error("Failed to upload script data");
+  }
 };

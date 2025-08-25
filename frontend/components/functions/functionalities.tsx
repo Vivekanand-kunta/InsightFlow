@@ -17,8 +17,7 @@ export function urlCreatorfunction(file:File){
 }
 
 export function validateTask(task:Task){
-    if (task.title.length==0 || task.emails.length==0 || task.description.length==0 || task.scripts.length==0){
-      alert('Please fill title,emails,description,frequency and script fields');
+    if (task.title.length==0 || task.emails.length==0 || task.description.length==0){
       return false;}
     return true;
 };

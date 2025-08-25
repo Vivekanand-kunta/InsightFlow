@@ -12,61 +12,95 @@ class Email(BaseModel):
     e_id: str
     email: str
 
-class Script(BaseModel):
-    script_name: str
-    s_id: str
-    exe_order: str
-
 class Task(BaseModel):
     title: str
     description: str
     frequency: str
     databases: List[Database]
     emails: List[Email]
-    scripts: List[Script]
 
-async def update_task_details(task: Task):
+
+async def update_task_details(task_id: str, task: Task):
     if db.pool is None:
         raise Exception("Pool not initialized")
+    print("Inside updating details")
 
     async with db.pool.acquire() as conn:
+        print('Before transaction')
         async with conn.transaction():
 
-            # Update main task table (assuming you identify task by some task_id)
+            # Update main task
             await conn.execute(
                 """
-                UPDATE task 
+                UPDATE tasks 
                 SET title=$1, description=$2, frequency=$3
-                WHERE title=$1
+                WHERE task_id=$4
                 """,
-                task.title, task.description, task.frequency
+                task.title, task.description, task.frequency, task_id
             )
+            print('After updating task')
 
-            # UPSERT databases
+            # ---- Databases ----
             for database in task.databases:
-                await conn.execute(
+                existing_db = await conn.fetchval(
                     """
-                    INSERT INTO databases (d_id, db_name, db_connection)
-                    VALUES ($1, $2, $3)
-                    ON CONFLICT (d_id) 
-                    DO UPDATE SET db_name=EXCLUDED.db_name,
-                                  db_connection=EXCLUDED.db_connection
+                    SELECT 1 FROM databases 
+                    WHERE task_id=$1 AND d_id=$2
                     """,
-                    database.d_id, database.db_name, database.db_connection
+                    task_id, database.d_id
                 )
+                if existing_db:
+                    # Update
+                    await conn.execute(
+                        """
+                        UPDATE databases
+                        SET db_name=$1, db_connection=$2
+                        WHERE task_id=$3 AND d_id=$4
+                        """,
+                        database.db_name, database.db_connection, task_id, database.d_id
+                    )
+                else:
+                    # Insert
+                    await conn.execute(
+                        """
+                        INSERT INTO databases (task_id, d_id, db_name, db_connection)
+                        VALUES ($1, $2, $3, $4)
+                        """,
+                        task_id, database.d_id, database.db_name, database.db_connection
+                    )
+            print('After updating databases')
 
-            # UPSERT emails
+            # ---- Emails ----
             for email in task.emails:
-                await conn.execute(
+                existing_email = await conn.fetchval(
                     """
-                    INSERT INTO emails (e_id, category, email)
-                    VALUES ($1, $2, $3)
-                    ON CONFLICT (e_id) 
-                    DO UPDATE SET category=EXCLUDED.category,
-                                  email=EXCLUDED.email
+                    SELECT 1 FROM emails 
+                    WHERE task_id=$1 AND e_id=$2
                     """,
-                    email.e_id, email.category, email.email
+                    task_id, email.e_id
                 )
+                if existing_email:
+                    # Update
+                    await conn.execute(
+                        """
+                        UPDATE emails
+                        SET category=$1, email=$2
+                        WHERE task_id=$3 AND e_id=$4
+                        """,
+                        email.category, email.email, task_id, email.e_id
+                    )
+                else:
+                    # Insert
+                    await conn.execute(
+                        """
+                        INSERT INTO emails (task_id, e_id, category, email)
+                        VALUES ($1, $2, $3, $4)
+                        """,
+                        task_id, email.e_id, email.category, email.email
+                    )
+            print('After updating emails')
+
+        print("After complete transaction")
 
     return {
         "status": "success",

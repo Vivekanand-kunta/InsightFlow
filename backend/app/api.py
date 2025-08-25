@@ -58,8 +58,10 @@ async def get_tasks():
 @router.get("/task/{task_id}")
 async def get_single_task(task_id:str):
     try:
-        task=await get_task(task_id)
-        return task
+        print('IN API.PY')
+        res=await get_task(task_id)
+        print('After getting Task')
+        return res
     except Exception as e :
         raise HTTPException(status_code=400,detail=f"Error {e} \n While fetching tasks")
 
@@ -82,11 +84,14 @@ async def get_task_script(task_id:str,filename:str):
 async def upload_data(task_id:str,task:Task):
     try:
         response=await check_task(task_id)
-        if response.exists=='false':
+        if not response:
             res=await create_task(task_id,task)
             return {"status":"success"}
         else:
-            res=await update_task_details(task)
+            print("Before updating task")
+            res=await update_task_details(task_id,task)
+            print('After updating task')
+            return {'status':'success'}
     except Exception as e :
         raise HTTPException(status_code=400,detail=f"Error {e} \n While creating task")
     
@@ -105,7 +110,8 @@ async def check_task_existence(payload=Body(...)):
     try:
         task_id=payload.get('task_id')
         res=await check_task(task_id)
-        return res
+        exists='true' if res else 'false'
+        return {'status':'success','exists':exists,'msg':'Validated task Successfully'}
     except Exception as e:
         raise HTTPException(status_code=400,detail=f"Error {e} \n While fetching tasks")
 
@@ -114,22 +120,17 @@ async def check_script_existence(payload=Body(...)):
     try:
         task_id=payload.get('task_id')
         script_name=payload.get('script_name')
-        res=await check_script(task_id,script_name)
-        return res
+        res=check_script(task_id,script_name)
+        return {'status':'success','exists':res,'msg':"Checking script done"}
     except Exception as e:
         raise HTTPException(status_code=400,detail=f"Error {e} \n While fetching tasks")
-
-
-
-
-
-
-
-# Updating or Put requests
-  
-@router.put('task/script/{s_id}')
-async def updateScriptDetails(s_id:str,exe_order:str,script_name:str,task_id:str):
+ 
+@router.post('/task/script/{s_id}')
+async def updateScriptDetails(s_id:str,payload=Body(...)):
     try:
+        exe_order=payload.get('exe_order')
+        script_name=payload.get('script_name')
+        task_id=payload.get('task_id')
         res=await update_script_details(task_id,s_id,exe_order,script_name)
         if res.get('status') == "success":
             return res

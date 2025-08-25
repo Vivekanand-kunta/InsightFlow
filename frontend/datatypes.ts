@@ -61,11 +61,14 @@ export interface EmailsProps{
 export interface ScriptProps{
     task_id:string,
     script:Script,
-    setModified:React.Dispatch<React.SetStateAction<boolean>>,
     setScripts:React.Dispatch<React.SetStateAction<Script[]>>
 }
 
 export interface InputFilesFormProps{
     filename:string,
     task_id : string,
-    setModified:React.Dispatch<React.SetStateAction<boolean>>}
+    exe_order:string,
+    scriptname:string,
+    scriptModified:boolean,
+    setScriptModified:React.Dispatch<React.SetStateAction<boolean>>,
+ }

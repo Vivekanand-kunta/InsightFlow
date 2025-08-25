@@ -3,12 +3,14 @@ import { useRef } from 'react';
 import { ScriptProps} from '@/datatypes'
 import { Input } from '../ui/input';
 import InputFilesForm from './InputFilesForm';
+import {useState} from 'react';
 
 const Scripts = (props:ScriptProps) => {
     const exeRef=useRef<HTMLInputElement|null>(null);
     const scriptNameRef=useRef<HTMLInputElement|null>(null);
+    const [scriptModified,setScriptModified]=useState<boolean>(false)
   return (
-    <div>
+    <div className='m-4 py-3'>
         <Input type="text" 
         value={props.script.exe_order} 
         ref={exeRef}
@@ -20,7 +22,7 @@ const Scripts = (props:ScriptProps) => {
                   : sc
               )
             );
-            props.setModified(true);
+            setScriptModified(true);
           }}
           className='w-full mb-2' placeholder='Exe-Order Number'/>
 
@@ -35,10 +37,11 @@ const Scripts = (props:ScriptProps) => {
                   : sc
               )
             );
-            props.setModified(true);
+            setScriptModified(true);
           }} className='w-full mb-2' placeholder='Script Name'/>
-         <InputFilesForm filename={props.script.s_id}
-         task_id={props.task_id} setModified={props.setModified}/>
+         <InputFilesForm filename={props.script.s_id} scriptModified={scriptModified} 
+         scriptname={props.script.script_name} exe_order={props.script.exe_order}
+         task_id={props.task_id} setScriptModified={setScriptModified} />
     </div>
   )
 }

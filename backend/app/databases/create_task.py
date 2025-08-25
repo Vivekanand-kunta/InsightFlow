@@ -33,7 +33,7 @@ async def create_task(task_id: str, task: Task):
             # Insert task
             await conn.execute(
                 """
-                INSERT INTO tasks(id, title, description, frequency)
+                INSERT INTO tasks(task_id, title, description, frequency)
                 VALUES ($1, $2, $3, $4)
                 """,
                 task_id, task.title, task.description, task.frequency

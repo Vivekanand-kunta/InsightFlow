@@ -20,14 +20,20 @@ async def upload_file_to_frontend(task_id: str, filename: str):
         media_type = "application/octet-stream"
     return FileResponse(path=file_path, filename=filename, media_type=media_type)
 
-async def download_file_from_frontend(task_id: str, filename:str,file:UploadFile = File(...)):
-    folder_path = f"{os.getenv('BASE_ADD')}/scripts/{task_id}/{filename}"
-    os.makedirs(folder_path, exist_ok=True) 
-    with open(folder_path, "wb") as f:
+async def download_file_from_frontend(task_id: str, filename: str, file: UploadFile = File(...)):
+    print("Inside downlaod from frontend")
+    folder_path = f"{os.getenv('BASE_ADD')}/scripts/{task_id}"
+    print(f"Folder path :{folder_path}")
+    os.makedirs(folder_path, exist_ok=True)  
+    file_path = os.path.join(folder_path, filename) 
+    print(f'file_path : {file_path}')
+    print("Before writing into the file")
+    with open(file_path, "wb") as f:
         while chunk := await file.read(1024 * 1024):  
             f.write(chunk)
+    print("After writing into the file")
     return {"status": "success", "msg": f"File {filename} uploaded successfully."}
-            
+       
 async def delete_files(task_id: str,filename:str):
     folder_path = f"{os.getenv('BASE_ADD')}/scripts/{task_id}/{filename}"
     if os.path.exists(folder_path):

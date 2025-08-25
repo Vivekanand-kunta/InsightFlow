@@ -7,9 +7,4 @@ async def check_task(task_id: str):
         row = await conn.fetchrow(
             'SELECT task_id FROM tasks WHERE task_id=$1', task_id
         )
-    exists = 'true' if row else 'false'
-    return {
-        "status": "success",
-        "exists": exists,
-        "msg": f"Query for task_id {task_id} executed successfully"
-    }
+    return True if row else False

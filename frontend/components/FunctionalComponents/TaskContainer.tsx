@@ -1,6 +1,6 @@
 import React from 'react'
 import { Input } from '../ui/input';
-import { TaskContainerProps,Script,Database, Email} from '@/datatypes';
+import { TaskContainerProps,Script,Database, Email,Task} from '@/datatypes';
 import Frequency from './Frequency';
 import Databases from './Databases';
 import Emails from './Emails';
@@ -8,6 +8,7 @@ import Scripts from './Scripts';
 import { Button } from '../ui/button';
 import { generateTaskId } from '../functions/functionalities';
 import {useState} from 'react'
+import { uploadTask } from '../functions/fetching';
 
 const TaskContainer = (props: TaskContainerProps) => {
     const [modified,setModified]=useState<boolean>(false);
@@ -85,14 +86,23 @@ const TaskContainer = (props: TaskContainerProps) => {
             key={script.s_id}
             task_id={props.task_id}
             script={script}
-            setModified={setModified}
             setScripts={props.setScripts}
           />
         ))}
       </div>
       {modified && <div>
         <Button
-        onClick={()=>{alert('On Click');setModified(false);}}
+        onClick={async()=>{
+          const taskData: Task = {
+            title: props.title,
+            description: props.description,
+            frequency: props.frequency,
+            databases: props.databases,
+            emails: props.emails,
+            scripts: props.scripts,
+          };
+          const res=await uploadTask(props.task_id,taskData);setModified(false);
+        setModified(false);}}
         >Submit</Button>
       </div>}
     </div>
